@@ -115,7 +115,7 @@ const ParishSearchPanel = (props) => {
                         <div className='border border-stone-400 p-2 my-2'>
                             <CalciteLabel>
                                 Farm/property
-                                <ArcgisSearch id="parish-search-widget" reference-element={referenceElement} />
+                                <ArcgisSearch id="parish-search-widget" reference-element={referenceElement} popupDisabled/>
                             </CalciteLabel>
                         </div>
                     </>
