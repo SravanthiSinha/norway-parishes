@@ -22,8 +22,6 @@ const FeaturesDetails = (props) => {
                 location: mappoint,
                 fetchFeatures: true
             });
-            // disable popup for features widget as feature information will be rendered in side panel
-            map.view.popupEnabled = false;
         });
     }
     return (

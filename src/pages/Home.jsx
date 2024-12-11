@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import "@arcgis/map-components/dist/components/arcgis-map";
 import "@arcgis/map-components/dist/components/arcgis-zoom";
 import '@arcgis/map-components/dist/components/arcgis-features';
@@ -13,10 +13,10 @@ const Home = () => {
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
     const mapId = 'arcgis-map';
-
+    
     return (
         <CalciteShell>
-            <ArcgisMap id={mapId} itemId="454a0303bffb487abf2d6c2c36ff4f0f" ref={mapRef} onArcgisViewReadyChange={(e) => setMap(e.target)} >
+            <ArcgisMap id={mapId} itemId="454a0303bffb487abf2d6c2c36ff4f0f" ref={mapRef} onArcgisViewReadyChange={(e) => setMap(e.target)} popupDisabled >
                 <ArcgisZoom position="top-left" />
             </ArcgisMap>
             <SidePanel mapElement={map} referenceElement={`#${mapId}`} />
