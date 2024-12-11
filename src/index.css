@@ -97,3 +97,7 @@ calcite-shell-panel {
 .esri-search {
   width: 100%;
 }
+
+.esri-widget--panel {
+  max-height: 80vh
+}

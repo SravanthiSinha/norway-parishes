@@ -8,6 +8,7 @@ import uniqueValues from "@arcgis/core/smartMapping/statistics/uniqueValues";
 import ParishSearchPanel from './ParishSearchPanel';
 import FeaturesDetails from './FeaturesDetails';
 import Legend from './Legend';
+import BasemapGallery from './BasemapGallery';
 
 
 const SidePanel = (props) => {
@@ -239,6 +240,13 @@ const SidePanel = (props) => {
                     active={activePanel === 'legend'} 
                     onClick={handleActionClick} 
                 />
+                <CalciteAction 
+                    data-action-id="basemap" 
+                    text="Base Maps" 
+                    icon="basemap" 
+                    active={activePanel === 'basemap'} 
+                    onClick={handleActionClick} 
+                />
                 <calcite-tooltip slot="expand-tooltip">Toggle Action Bar</calcite-tooltip>
             </CalciteActionBar>
             
@@ -265,6 +273,11 @@ const SidePanel = (props) => {
             )}
             {activePanel === 'legend' && mapElement && (
                 <Legend 
+                    referenceElement={referenceElement}
+                />
+            )}
+            {activePanel === 'basemap' && mapElement && (
+                <BasemapGallery 
                     referenceElement={referenceElement}
                 />
             )}
