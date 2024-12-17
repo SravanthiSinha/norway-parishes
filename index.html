@@ -9,5 +9,18 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      (function() {
+        // Get the saved path from sessionStorage
+        const savedPath = sessionStorage.getItem('spa-path');
+        if (savedPath) {
+          // Remove it from sessionStorage
+          sessionStorage.removeItem('spa-path');
+          // Replace the current history state with the saved path
+          const newPath = '/norway-parishes' + (savedPath === '/' ? '' : savedPath);
+          window.history.replaceState(null, null, newPath);
+        }
+      })();
+    </script>
   </body>
 </html>

@@ -7,7 +7,7 @@ import Contact from './pages/Contact';
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/norway-parishes">
       <MainLayout>
         <Routes>
           <Route path="/" element={<Home />} />
