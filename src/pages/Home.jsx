@@ -4,7 +4,7 @@ import "@arcgis/map-components/dist/components/arcgis-zoom";
 import '@arcgis/map-components/dist/components/arcgis-features';
 import { ArcgisMap, ArcgisZoom } from "@arcgis/map-components-react";
 import { CalciteShell } from "@esri/calcite-components-react";
-import SidePanel from '../components/Layout/SidePanel';
+import SidePanel from '../components/SidePanel';
 
 import "@arcgis/map-components/dist/components/arcgis-legend";
 
