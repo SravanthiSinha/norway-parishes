@@ -17,6 +17,11 @@ const FeaturesDetails = (props) => {
         map?.addEventListener('click', (event) => {
             const mappoint = map.toMap(event);
             event.stopPropagation();
+            // Clear existing highlights by finding and clearing the highlight layer
+            const highlightLayer = map.map.findLayerById("highlightLayer");
+            if (highlightLayer) {
+                highlightLayer.removeAll();
+            }
             const featuresElement = featuresRef.current;
             featuresElement?.open({
                 location: mappoint,

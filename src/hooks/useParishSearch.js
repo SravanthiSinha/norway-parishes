@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { HighlightManager } from '../utils/HighlightManager';
 
 export const useParishSearch = (mapElement) => {
     const [selection, setSelection] = useState({
@@ -13,6 +14,23 @@ export const useParishSearch = (mapElement) => {
         parish: ''
     });
 
+    const highlightManagerRef = useRef(null);
+
+    // Initialize highlight manager when map is ready
+    useEffect(() => {
+        if (mapElement?.view && !highlightManagerRef.current) {
+            highlightManagerRef.current = new HighlightManager(mapElement.view);
+        }
+
+        // Cleanup
+        return () => {
+            if (highlightManagerRef.current) {
+                highlightManagerRef.current.destroy();
+                highlightManagerRef.current = null;
+            }
+        };
+    }, [mapElement?.view]);
+
     const zoomToFeature = useCallback(async (whereClause) => {
         if (!mapElement?.map) return;
 
@@ -26,6 +44,10 @@ export const useParishSearch = (mapElement) => {
             const extentResult = await targetLayer.queryExtent({ where: whereClause });
             if (extentResult?.extent) {
                 await mapElement.view?.goTo(extentResult.extent);
+                // Highlight the feature
+                if (highlightManagerRef.current) {
+                    await highlightManagerRef.current.highlightFeature(targetLayer, whereClause);
+                }
             }
         } catch (error) {
             console.error('Error zooming to feature:', error);
