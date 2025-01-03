@@ -11,17 +11,19 @@ import "@arcgis/map-components/dist/components/arcgis-search";
 import { ArcgisSearch } from "@arcgis/map-components-react";
 
 const ParishSearchPanel = (props) => {
-    const { 
-        counties, 
-        parishes, 
-        municipalities, 
+    const {
+        counties,
+        parishes,
+        municipalities,
         referenceElement,
         selectedCounty,
         selectedMunicipality,
         selectedParish,
         onCountySelect,
         onMunicipalitySelect,
-        onParishSelect
+        onParishSelect,
+        onSearchResult,
+        searchText
     } = props;
 
     const [loading, setLoading] = useState(true);
@@ -59,11 +61,11 @@ const ParishSearchPanel = (props) => {
                         <div className='border border-stone-400 p-2 my-2'>
                             <CalciteLabel>
                                 County (fylke)
-                                <CalciteCombobox 
-                                    placeholder="Select county name" 
-                                    selectionMode="single" 
-                                    id="county-combobox" 
-                                    onCalciteComboboxChange={handleCountySelection} 
+                                <CalciteCombobox
+                                    placeholder="Select county name"
+                                    selectionMode="single"
+                                    id="county-combobox"
+                                    onCalciteComboboxChange={handleCountySelection}
                                     value={selectedCounty}
                                 >
                                     {counties.map((county) => (
@@ -74,11 +76,11 @@ const ParishSearchPanel = (props) => {
 
                             <CalciteLabel>
                                 Municipality
-                                <CalciteCombobox 
-                                    placeholder="Select parish name" 
-                                    selectionMode="single" 
-                                    id="municipality-combobox" 
-                                    onCalciteComboboxChange={handleMunicipalitySelection} 
+                                <CalciteCombobox
+                                    placeholder="Select parish name"
+                                    selectionMode="single"
+                                    id="municipality-combobox"
+                                    onCalciteComboboxChange={handleMunicipalitySelection}
                                     value={selectedMunicipality}
                                 >
                                     {selectedCounty && (
@@ -93,11 +95,11 @@ const ParishSearchPanel = (props) => {
 
                             <CalciteLabel>
                                 Local parish (sokn)
-                                <CalciteCombobox 
-                                    placeholder="Select local parish name" 
-                                    selectionMode="single" 
-                                    id="localparish-combobox" 
-                                    onCalciteComboboxChange={handleLocalParishSelection} 
+                                <CalciteCombobox
+                                    placeholder="Select local parish name"
+                                    selectionMode="single"
+                                    id="localparish-combobox"
+                                    onCalciteComboboxChange={handleLocalParishSelection}
                                     value={selectedParish}
                                 >
                                     {selectedCounty && selectedMunicipality && (
@@ -115,7 +117,13 @@ const ParishSearchPanel = (props) => {
                         <div className='border border-stone-400 p-2 my-2'>
                             <CalciteLabel>
                                 Farm/property
-                                <ArcgisSearch id="parish-search-widget" reference-element={referenceElement} popupDisabled/>
+                                <ArcgisSearch
+                                    id="parish-search-widget"
+                                    reference-element={referenceElement}
+                                    onArcgisSelectResult={onSearchResult}
+                                    searchTerm={searchText}
+                                    popupDisabled
+                                />
                             </CalciteLabel>
                         </div>
                     </>

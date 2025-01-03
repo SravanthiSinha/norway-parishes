@@ -8,6 +8,8 @@ export const useParishSearch = (mapElement) => {
         parish: ''
     });
 
+    const [searchText, setSearchText] = useState('');
+
     const lastSelection = useRef({
         county: '',
         municipality: '',
@@ -22,7 +24,6 @@ export const useParishSearch = (mapElement) => {
             highlightManagerRef.current = new HighlightManager(mapElement.view);
         }
 
-        // Cleanup
         return () => {
             if (highlightManagerRef.current) {
                 highlightManagerRef.current.destroy();
@@ -55,7 +56,6 @@ export const useParishSearch = (mapElement) => {
     }, [mapElement]);
 
     const shouldZoom = useCallback((newValue, type) => {
-        // Check if the value has actually changed from last selection
         return newValue !== lastSelection.current[type];
     }, []);
 
@@ -68,6 +68,9 @@ export const useParishSearch = (mapElement) => {
             municipality: '',
             parish: ''
         };
+
+        // Reset search text
+        setSearchText('');
 
         if (county) {
             const whereClause = `COUNTY = '${county.replace(/'/g, "''")}'`;
@@ -89,6 +92,9 @@ export const useParishSearch = (mapElement) => {
             parish: ''
         };
 
+        // Reset search text
+        setSearchText('');
+
         if (municipality && selection.county) {
             const whereClause = `COUNTY = '${selection.county.replace(/'/g, "''")}' AND MUNICIPALITY = '${municipality.replace(/'/g, "''")}'`;
             await zoomToFeature(whereClause);
@@ -104,18 +110,106 @@ export const useParishSearch = (mapElement) => {
             parish: parish || ''
         };
 
+        // Reset search text
+        setSearchText('');
+        
         if (parish && selection.county && selection.municipality) {
             const whereClause = `COUNTY = '${selection.county.replace(/'/g, "''")}' AND MUNICIPALITY = '${selection.municipality.replace(/'/g, "''")}' AND Par_NAME = '${parish.replace(/'/g, "''")}'`;
             await zoomToFeature(whereClause);
         }
     }, [selection.county, selection.municipality, zoomToFeature, shouldZoom]);
 
+    const queryParishLayer = useCallback(async (geometry) => {
+        if (!mapElement?.map) return null;
+
+        const parishLayer = mapElement.map.layers.find(
+            layer => layer.title === 'Parishes (sokn)'
+        );
+
+        if (!parishLayer) return null;
+
+        try {
+            const query = parishLayer.createQuery();
+            query.geometry = geometry;
+            query.spatialRelationship = "intersects";
+            query.outFields = ["COUNTY", "MUNICIPALITY", "Par_NAME"];
+            query.returnGeometry = false;
+
+            const result = await parishLayer.queryFeatures(query);
+            return result.features?.[0]?.attributes;
+        } catch (error) {
+            console.error('Error querying parish layer:', error);
+            return null;
+        }
+    }, [mapElement]);
+
+    const handleSearchResult = useCallback(async (event) => {
+        try {
+            const result = event.detail.result;
+            if (!result?.feature?.geometry) return;
+
+            if (result.name) {
+                setSearchText(result.name);
+            }
+
+            const attributes = await queryParishLayer(result.feature.geometry);
+            if (!attributes) return;
+
+            const {
+                COUNTY: county,
+                MUNICIPALITY: municipality,
+                Par_NAME: parish
+            } = attributes;
+
+            const searchName = result.name?.toLowerCase() || '';
+            let newSelection = { ...selection };
+
+            if (county?.toLowerCase() === searchName) {
+                newSelection = {
+                    county,
+                    municipality: '',
+                    parish: ''
+                };
+            } else if (municipality?.toLowerCase() === searchName) {
+                newSelection = {
+                    county,
+                    municipality,
+                    parish: ''
+                };
+            } else if (parish?.toLowerCase() === searchName) {
+                newSelection = {
+                    county,
+                    municipality,
+                    parish
+                };
+            } else {
+                newSelection = {
+                    county: county || '',
+                    municipality: municipality || '',
+                    parish: parish || ''
+                };
+            }
+
+            setSelection(newSelection);
+            lastSelection.current = newSelection;
+
+            if (highlightManagerRef.current) {
+                await highlightManagerRef.current.highlightSearchResult(result);
+            }
+
+        } catch (error) {
+            console.error('Search result processing error:', error);
+        }
+    }, [queryParishLayer, selection]);
+
     return {
         selection,
+        searchText,
         handlers: {
             onCountySelect: handleCountySelect,
             onMunicipalitySelect: handleMunicipalitySelect,
-            onParishSelect: handleParishSelect
+            onParishSelect: handleParishSelect,
+            onSearchResult: handleSearchResult
         }
     };
 };

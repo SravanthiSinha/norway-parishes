@@ -48,6 +48,8 @@ const SidePanel = (props) => {
                         onCountySelect={searchState.handlers.onCountySelect}
                         onMunicipalitySelect={searchState.handlers.onMunicipalitySelect}
                         onParishSelect={searchState.handlers.onParishSelect}
+                        onSearchResult={searchState.handlers.onSearchResult}
+                        searchText={searchState.searchText}
                         referenceElement={referenceElement}
                     />
                 );
