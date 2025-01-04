@@ -99,5 +99,9 @@ calcite-shell-panel {
 }
 
 .esri-widget--panel {
-  max-height: 80vh
+  height: 80vh;
+}
+
+.esri-basemap-gallery:focus-within {
+  outline: none;
 }
