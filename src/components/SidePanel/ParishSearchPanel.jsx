@@ -27,6 +27,8 @@ const ParishSearchPanel = (props) => {
     } = props;
 
     const [loading, setLoading] = useState(true);
+    const [expandedCounty, setExpandedCounty] = useState(null);
+    const [expandedMunicipality, setExpandedMunicipality] = useState(null);
 
     useEffect(() => {
         if (!counties || !parishes || !municipalities) {
@@ -36,20 +38,101 @@ const ParishSearchPanel = (props) => {
         setLoading(false);
     }, [counties, parishes, municipalities]);
 
-    // Combobox selection handlers
+    // Find parent county for a municipality
+    const findCountyForMunicipality = (targetMunicipality) => {
+        for (const county in municipalities) {
+            if (municipalities[county]?.includes(targetMunicipality)) {
+                return county;
+            }
+        }
+        return null;
+    };
+
+    // Find parent county and municipality for a parish
+    const findParentsForParish = (targetParish) => {
+        for (const county in parishes) {
+            for (const municipality in parishes[county]) {
+                if (parishes[county][municipality]?.includes(targetParish)) {
+                    return { county, municipality };
+                }
+            }
+        }
+        return { county: null, municipality: null };
+    };
+
+    // Handle combobox expansions
+    const handleCountyExpand = (event) => {
+        setExpandedCounty(event.detail.groupId);
+    };
+
+    const handleMunicipalityExpand = (event) => {
+        setExpandedMunicipality(event.detail.groupId);
+    };
+
+    // Combobox selection handlers with cascading updates
     const handleCountySelection = (event) => {
         const selected = event.target?.value;
         onCountySelect(selected);
+        setExpandedCounty(selected);
     };
 
     const handleMunicipalitySelection = (event) => {
         const selected = event.target?.value;
+        if (!selected) {
+            onMunicipalitySelect(selected);
+            return;
+        }
+
+        const parentCounty = findCountyForMunicipality(selected);
+        if (parentCounty) {
+            onCountySelect(parentCounty);
+            setExpandedCounty(parentCounty);
+        }
         onMunicipalitySelect(selected);
+        setExpandedMunicipality(selected);
     };
 
     const handleLocalParishSelection = (event) => {
         const selected = event.target?.value;
+        if (!selected) {
+            onParishSelect(selected);
+            return;
+        }
+
+        const { county, municipality } = findParentsForParish(selected);
+        if (county && municipality) {
+            onCountySelect(county);
+            onMunicipalitySelect(municipality);
+            setExpandedCounty(county);
+            setExpandedMunicipality(municipality);
+        }
         onParishSelect(selected);
+    };
+
+    // Render municipality items for a county
+    const renderMunicipalityItems = (county) => {
+        if (!municipalities[county]) return null;
+        
+        return municipalities[county].map((municipality) => (
+            <CalciteComboboxItem
+                key={`${county}-${municipality}`}
+                value={municipality}
+                textLabel={municipality}
+            />
+        ));
+    };
+
+    // Render parish items for a municipality
+    const renderParishItems = (county, municipality) => {
+        if (!parishes[county]?.[municipality]) return null;
+
+        return parishes[county][municipality].map((parish) => (
+            <CalciteComboboxItem
+                key={`${county}-${municipality}-${parish}`}
+                value={parish}
+                textLabel={parish}
+            />
+        ));
     };
 
     return (
@@ -77,19 +160,22 @@ const ParishSearchPanel = (props) => {
                             <CalciteLabel>
                                 Municipality
                                 <CalciteCombobox
-                                    placeholder="Select parish name"
+                                    placeholder="Select municipality"
                                     selectionMode="single"
                                     id="municipality-combobox"
                                     onCalciteComboboxChange={handleMunicipalitySelection}
                                     value={selectedMunicipality}
                                 >
-                                    {selectedCounty && (
-                                        <CalciteComboboxItemGroup label={selectedCounty}>
-                                            {municipalities[selectedCounty]?.map((municipality) => (
-                                                <CalciteComboboxItem key={municipality} value={municipality} textLabel={municipality} />
-                                            ))}
+                                    {counties.map((county) => (
+                                        <CalciteComboboxItemGroup 
+                                            key={county} 
+                                            label={county}
+                                            expanded={expandedCounty === county}
+                                            onCalciteComboboxItemGroupClick={handleCountyExpand}
+                                        >
+                                            {renderMunicipalityItems(county)}
                                         </CalciteComboboxItemGroup>
-                                    )}
+                                    ))}
                                 </CalciteCombobox>
                             </CalciteLabel>
 
@@ -102,15 +188,25 @@ const ParishSearchPanel = (props) => {
                                     onCalciteComboboxChange={handleLocalParishSelection}
                                     value={selectedParish}
                                 >
-                                    {selectedCounty && selectedMunicipality && (
-                                        <CalciteComboboxItemGroup label={selectedCounty}>
-                                            <CalciteComboboxItemGroup label={selectedMunicipality}>
-                                                {parishes[selectedCounty][selectedMunicipality]?.map((parish) => (
-                                                    <CalciteComboboxItem key={parish} value={parish} textLabel={parish} />
-                                                ))}
-                                            </CalciteComboboxItemGroup>
+                                    {counties.map((county) => (
+                                        <CalciteComboboxItemGroup 
+                                            key={county} 
+                                            label={county}
+                                            expanded={expandedCounty === county}
+                                            onCalciteComboboxItemGroupClick={handleCountyExpand}
+                                        >
+                                            {municipalities[county]?.map((municipality) => (
+                                                <CalciteComboboxItemGroup
+                                                    key={`${county}-${municipality}`}
+                                                    label={municipality}
+                                                    expanded={expandedMunicipality === municipality}
+                                                    onCalciteComboboxItemGroupClick={handleMunicipalityExpand}
+                                                >
+                                                    {renderParishItems(county, municipality)}
+                                                </CalciteComboboxItemGroup>
+                                            ))}
                                         </CalciteComboboxItemGroup>
-                                    )}
+                                    ))}
                                 </CalciteCombobox>
                             </CalciteLabel>
                         </div>
@@ -128,7 +224,9 @@ const ParishSearchPanel = (props) => {
                         </div>
                     </>
                 )}
-            </div> </CalcitePanel>);
-}
+            </div>
+        </CalcitePanel>
+    );
+};
 
 export default ParishSearchPanel;
