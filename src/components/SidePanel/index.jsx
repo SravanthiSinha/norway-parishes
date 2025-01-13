@@ -47,6 +47,7 @@ const SidePanel = (props) => {
                         selectedParish={searchState.selection.parish}
                         onComboBoxSelect={searchState.handlers.onComboBoxSelect}
                         onSearchResult={searchState.handlers.onSearchResult}
+                        onSearchClear={searchState.handlers.onSearchClear}
                         searchText={searchState.searchText}
                         referenceElement={referenceElement}
                     />

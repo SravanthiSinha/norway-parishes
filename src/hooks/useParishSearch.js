@@ -66,29 +66,29 @@ export const useParishSearch = (mapElement) => {
             municipality: municipality || '',
             parish: parish || ''
         };
-        console.log(newSelection)
         if (!shouldZoom(newSelection)) return;
 
 
         setSelection(newSelection);
         lastSelection.current = newSelection;
-        setSearchText('');
 
         if (parish && county && municipality) {
             const whereClause = `COUNTY = '${county.replace(/'/g, "''")}' AND MUNICIPALITY = '${municipality.replace(/'/g, "''")}' AND Par_NAME = '${parish.replace(/'/g, "''")}'`;
             await zoomToFeature(whereClause);
+            setSearchText(parish + ', ' + municipality + ', ' + county);
         }
         else if (municipality && county) {
             const whereClause = `COUNTY = '${county.replace(/'/g, "''")}' AND MUNICIPALITY = '${municipality.replace(/'/g, "''")}'`;
             await zoomToFeature(whereClause);
+            setSearchText(municipality + ', ' + county);
         }
         else if (county) {
             const whereClause = `COUNTY = '${county.replace(/'/g, "''")}'`;
             await zoomToFeature(whereClause);
+            setSearchText(county);
         }
         else {
-            const whereClause = `1=1`;
-            await zoomToFeature(whereClause);
+            handleSearchClear();
         }
     }, [zoomToFeature, shouldZoom]);
 
@@ -176,12 +176,26 @@ export const useParishSearch = (mapElement) => {
         }
     }, [queryParishLayer, selection, shouldZoom]);
 
+    const handleSearchClear = () => {
+        const newSelection = {
+            county: '',
+            municipality: '',
+            parish: ''
+        };
+        setSelection(newSelection);
+        lastSelection.current = newSelection;
+        setSearchText('');
+        if (highlightManagerRef.current) {
+            highlightManagerRef.current.clearHighlight();
+        }
+    }
     return {
         selection,
         searchText,
         handlers: {
             onComboBoxSelect: handleComboBoxSelect,
-            onSearchResult: handleSearchResult
+            onSearchResult: handleSearchResult,
+            onSearchClear: handleSearchClear
         }
     };
 };

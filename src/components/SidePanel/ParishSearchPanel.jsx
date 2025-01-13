@@ -21,6 +21,7 @@ const ParishSearchPanel = (props) => {
         selectedParish,
         onComboBoxSelect,
         onSearchResult,
+        onSearchClear,
         searchText
     } = props;
 
@@ -186,6 +187,7 @@ const ParishSearchPanel = (props) => {
                                     id="parish-search-widget"
                                     reference-element={referenceElement}
                                     onArcgisSelectResult={onSearchResult}
+                                    onArcgisClear={onSearchClear}
                                     searchTerm={searchText}
                                     popupDisabled
                                 />
