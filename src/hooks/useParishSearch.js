@@ -55,69 +55,42 @@ export const useParishSearch = (mapElement) => {
         }
     }, [mapElement]);
 
-    const shouldZoom = useCallback((newValue, type) => {
-        return newValue !== lastSelection.current[type];
+    const shouldZoom = useCallback((newSelection) => {
+        return JSON.stringify(newSelection) !== JSON.stringify(lastSelection.current);
     }, []);
 
-    const handleCountySelect = useCallback(async (county) => {
-        if (!shouldZoom(county, 'county')) return;
+    const handleComboBoxSelect = useCallback(async (county = null, municipality = null, parish = null) => {
 
-        setSelection({ county: county || '', municipality: '', parish: '' });
-        lastSelection.current = {
+        const newSelection = {
             county: county || '',
-            municipality: '',
-            parish: ''
+            municipality: municipality || '',
+            parish: parish || ''
         };
+        console.log(newSelection)
+        if (!shouldZoom(newSelection)) return;
 
-        // Reset search text
+
+        setSelection(newSelection);
+        lastSelection.current = newSelection;
         setSearchText('');
 
-        if (county) {
+        if (parish && county && municipality) {
+            const whereClause = `COUNTY = '${county.replace(/'/g, "''")}' AND MUNICIPALITY = '${municipality.replace(/'/g, "''")}' AND Par_NAME = '${parish.replace(/'/g, "''")}'`;
+            await zoomToFeature(whereClause);
+        }
+        else if (municipality && county) {
+            const whereClause = `COUNTY = '${county.replace(/'/g, "''")}' AND MUNICIPALITY = '${municipality.replace(/'/g, "''")}'`;
+            await zoomToFeature(whereClause);
+        }
+        else if (county) {
             const whereClause = `COUNTY = '${county.replace(/'/g, "''")}'`;
             await zoomToFeature(whereClause);
         }
+        else {
+            const whereClause = `1=1`;
+            await zoomToFeature(whereClause);
+        }
     }, [zoomToFeature, shouldZoom]);
-
-    const handleMunicipalitySelect = useCallback(async (municipality) => {
-        if (!shouldZoom(municipality, 'municipality')) return;
-
-        setSelection(prev => ({
-            ...prev,
-            municipality: municipality || '',
-            parish: ''
-        }));
-        lastSelection.current = {
-            ...lastSelection.current,
-            municipality: municipality || '',
-            parish: ''
-        };
-
-        // Reset search text
-        setSearchText('');
-
-        if (municipality && selection.county) {
-            const whereClause = `COUNTY = '${selection.county.replace(/'/g, "''")}' AND MUNICIPALITY = '${municipality.replace(/'/g, "''")}'`;
-            await zoomToFeature(whereClause);
-        }
-    }, [selection.county, zoomToFeature, shouldZoom]);
-
-    const handleParishSelect = useCallback(async (parish) => {
-        if (!shouldZoom(parish, 'parish')) return;
-
-        setSelection(prev => ({ ...prev, parish: parish || '' }));
-        lastSelection.current = {
-            ...lastSelection.current,
-            parish: parish || ''
-        };
-
-        // Reset search text
-        setSearchText('');
-        
-        if (parish && selection.county && selection.municipality) {
-            const whereClause = `COUNTY = '${selection.county.replace(/'/g, "''")}' AND MUNICIPALITY = '${selection.municipality.replace(/'/g, "''")}' AND Par_NAME = '${parish.replace(/'/g, "''")}'`;
-            await zoomToFeature(whereClause);
-        }
-    }, [selection.county, selection.municipality, zoomToFeature, shouldZoom]);
 
     const queryParishLayer = useCallback(async (geometry) => {
         if (!mapElement?.map) return null;
@@ -190,25 +163,24 @@ export const useParishSearch = (mapElement) => {
                 };
             }
 
-            setSelection(newSelection);
-            lastSelection.current = newSelection;
+            if (shouldZoom(newSelection)) {
+                setSelection(newSelection);
+                lastSelection.current = newSelection;
 
-            if (highlightManagerRef.current) {
-                await highlightManagerRef.current.highlightSearchResult(result);
+                if (highlightManagerRef.current) {
+                    await highlightManagerRef.current.highlightSearchResult(result);
+                }
             }
-
         } catch (error) {
             console.error('Search result processing error:', error);
         }
-    }, [queryParishLayer, selection]);
+    }, [queryParishLayer, selection, shouldZoom]);
 
     return {
         selection,
         searchText,
         handlers: {
-            onCountySelect: handleCountySelect,
-            onMunicipalitySelect: handleMunicipalitySelect,
-            onParishSelect: handleParishSelect,
+            onComboBoxSelect: handleComboBoxSelect,
             onSearchResult: handleSearchResult
         }
     };

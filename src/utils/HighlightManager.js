@@ -75,26 +75,28 @@ export class HighlightManager {
             // Clear existing highlights
             this.clearHighlight();
 
-            // Query the features
-            const query = layer.createQuery();
-            query.where = whereClause;
-            query.returnGeometry = true;
-            query.outFields = ["*"];
+            if (whereClause != "1=1") {
+                // Query the features
+                const query = layer.createQuery();
+                query.where = whereClause;
+                query.returnGeometry = true;
+                query.outFields = ["*"];
 
-            const results = await layer.queryFeatures(query);
+                const results = await layer.queryFeatures(query);
 
-            if (results.features && results.features.length > 0) {
-                results.features.forEach(feature => {
-                    if (feature.geometry) {
-                        const symbol = this.getSymbolForGeometry(feature.geometry);
-                        const highlightGraphic = new Graphic({
-                            geometry: feature.geometry,
-                            symbol: symbol
-                        });
-                        this.highlightLayer.add(highlightGraphic);
-                    }
-                });
-                return true;
+                if (results.features && results.features.length > 0) {
+                    results.features.forEach(feature => {
+                        if (feature.geometry) {
+                            const symbol = this.getSymbolForGeometry(feature.geometry);
+                            const highlightGraphic = new Graphic({
+                                geometry: feature.geometry,
+                                symbol: symbol
+                            });
+                            this.highlightLayer.add(highlightGraphic);
+                        }
+                    });
+                    return true;
+                }
             }
             return false;
         } catch (error) {

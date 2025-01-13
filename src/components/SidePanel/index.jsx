@@ -45,9 +45,7 @@ const SidePanel = (props) => {
                         selectedCounty={searchState.selection.county}
                         selectedMunicipality={searchState.selection.municipality}
                         selectedParish={searchState.selection.parish}
-                        onCountySelect={searchState.handlers.onCountySelect}
-                        onMunicipalitySelect={searchState.handlers.onMunicipalitySelect}
-                        onParishSelect={searchState.handlers.onParishSelect}
+                        onComboBoxSelect={searchState.handlers.onComboBoxSelect}
                         onSearchResult={searchState.handlers.onSearchResult}
                         searchText={searchState.searchText}
                         referenceElement={referenceElement}
@@ -67,33 +65,33 @@ const SidePanel = (props) => {
     return (
         <CalciteShellPanel slot="panel-end" position="end" widthScale="l" displayMode="dock" collapsed={isPanelCollapsed} >
             <CalciteActionBar slot="action-bar">
-                <CalciteAction 
-                    data-action-id="parish-search" 
-                    text="Find a parish" 
-                    icon="search" 
-                    active={activePanel === 'parish-search'} 
-                    onClick={handleActionClick} 
+                <CalciteAction
+                    data-action-id="parish-search"
+                    text="Find a parish"
+                    icon="search"
+                    active={activePanel === 'parish-search'}
+                    onClick={handleActionClick}
                 />
-                <CalciteAction 
-                    data-action-id="feature-details" 
-                    text="Parish info" 
-                    icon="feature-details" 
-                    active={activePanel === 'feature-details'} 
-                    onClick={handleActionClick} 
+                <CalciteAction
+                    data-action-id="feature-details"
+                    text="Parish info"
+                    icon="feature-details"
+                    active={activePanel === 'feature-details'}
+                    onClick={handleActionClick}
                 />
-                <CalciteAction 
-                    data-action-id="legend" 
-                    text="Legend" 
-                    icon="legend" 
-                    active={activePanel === 'legend'} 
-                    onClick={handleActionClick} 
+                <CalciteAction
+                    data-action-id="legend"
+                    text="Legend"
+                    icon="legend"
+                    active={activePanel === 'legend'}
+                    onClick={handleActionClick}
                 />
-                <CalciteAction 
-                    data-action-id="basemap" 
-                    text="Base Maps" 
-                    icon="basemap" 
-                    active={activePanel === 'basemap'} 
-                    onClick={handleActionClick} 
+                <CalciteAction
+                    data-action-id="basemap"
+                    text="Base Maps"
+                    icon="basemap"
+                    active={activePanel === 'basemap'}
+                    onClick={handleActionClick}
                 />
                 <calcite-tooltip slot="expand-tooltip"> Toggle Action Bar </calcite-tooltip>
             </CalciteActionBar>
