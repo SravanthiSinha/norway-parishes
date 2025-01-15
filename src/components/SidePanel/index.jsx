@@ -7,7 +7,6 @@ import {
 import { useMapData } from '../../hooks/useMapData';
 import { useParishSearch } from '../../hooks/useParishSearch';
 import ParishSearchPanel from './ParishSearchPanel';
-import FeaturesDetails from './FeaturesDetails';
 import Legend from './Legend';
 import BasemapGallery from './BasemapGallery';
 
@@ -52,8 +51,6 @@ const SidePanel = (props) => {
                         referenceElement={referenceElement}
                     />
                 );
-            case 'feature-details':
-                return <FeaturesDetails map={mapElement} referenceElement={referenceElement} />;
             case 'legend':
                 return <Legend referenceElement={referenceElement} />;
             case 'basemap':
@@ -71,13 +68,6 @@ const SidePanel = (props) => {
                     text="Find a parish"
                     icon="search"
                     active={activePanel === 'parish-search'}
-                    onClick={handleActionClick}
-                />
-                <CalciteAction
-                    data-action-id="feature-details"
-                    text="Parish info"
-                    icon="feature-details"
-                    active={activePanel === 'feature-details'}
                     onClick={handleActionClick}
                 />
                 <CalciteAction

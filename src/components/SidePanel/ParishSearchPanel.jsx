@@ -189,7 +189,6 @@ const ParishSearchPanel = (props) => {
                                     onArcgisSelectResult={onSearchResult}
                                     onArcgisClear={onSearchClear}
                                     searchTerm={searchText}
-                                    popupDisabled
                                 />
                             </CalciteLabel>
                         </div>
