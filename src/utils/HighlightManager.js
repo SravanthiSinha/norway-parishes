@@ -72,10 +72,10 @@ export class HighlightManager {
         try {
             if (!layer || !whereClause) return;
 
-            // Clear existing highlights
+            // Clear existing highlights and popup
             this.clearHighlight();
 
-            if (whereClause != "1=1") {
+            if (whereClause !== "1=1") {
                 // Query the features
                 const query = layer.createQuery();
                 query.where = whereClause;
@@ -90,11 +90,23 @@ export class HighlightManager {
                             const symbol = this.getSymbolForGeometry(feature.geometry);
                             const highlightGraphic = new Graphic({
                                 geometry: feature.geometry,
-                                symbol: symbol
+                                symbol: symbol,
+                                attributes: feature.attributes
                             });
                             this.highlightLayer.add(highlightGraphic);
                         }
                     });
+
+                    // Show popup for the first feature
+                    const feature = results.features[0];
+                    if (feature && this.view?.popup) {
+                        this.view.openPopup(
+                            {
+                                location: feature.geometry.centroid || feature.geometry,
+                                features: [feature]
+                            }
+                        )
+                    }
                     return true;
                 }
             }
@@ -135,16 +147,24 @@ export class HighlightManager {
             return false;
         }
     }
-
+    
     clearHighlight() {
         if (this.highlightLayer) {
             this.highlightLayer.removeAll();
+        }
+        if (this.view?.popup) {
+            this.view.popup.visible = false;
+            this.view.popup.features = [];
         }
     }
 
     destroy() {
         if (this.highlightLayer) {
             this.view.map.remove(this.highlightLayer);
+        }
+        if (this.view?.popup) {
+            this.view.popup.visible = false;
+            this.view.popup.features = [];
         }
     }
 }
