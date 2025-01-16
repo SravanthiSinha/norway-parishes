@@ -2,47 +2,109 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Graphic from "@arcgis/core/Graphic";
 
 export class HighlightManager {
-    constructor(view) {
+    constructor(view, onLocationSelect) {
         this.view = view;
+        this.onLocationSelect = onLocationSelect;
         this.highlightLayer = new GraphicsLayer({
             id: "highlightLayer",
             title: "Highlight Layer",
             listMode: "hide"
         });
         this.view.map.add(this.highlightLayer);
+          // Bind methods to instance
+          this.highlightFeature = this.highlightFeature.bind(this);
+          this.highlightSearchResult = this.highlightSearchResult.bind(this);
+          this.clearHighlight = this.clearHighlight.bind(this);
+          this.destroy = this.destroy.bind(this);
+  
+          // Symbol for polygon highlighting
+          this.symbols = {
+              polygon: {
+                  type: "simple-fill",
+                  color: [19, 253, 252, 0.2],
+                  outline: {
+                      color: [19, 253, 252, 0.6],
+                      width: 2
+                  }
+              },
+              point: {
+                  type: "simple-marker",
+                  style: "circle",
+                  color: [19, 253, 252, 0.6],
+                  size: "12px",
+                  outline: {
+                      color: [19, 253, 252, 1],
+                      width: 2
+                  }
+              },
+              polyline: {
+                  type: "simple-line",
+                  color: [19, 253, 252, 0.6],
+                  width: 4
+              }
+          };
+  
+        // Add click event handler
+        this.clickHandler = this.view.on("click", async (event) => {
 
-        // Bind methods to instance
-        this.highlightFeature = this.highlightFeature.bind(this);
-        this.highlightSearchResult = this.highlightSearchResult.bind(this);
-        this.clearHighlight = this.clearHighlight.bind(this);
-        this.destroy = this.destroy.bind(this);
+            try {
+                const parishLayer = this.view.map.layers.find(
+                    layer => layer.title === 'Parishes (sokn)'
+                );
 
-        // Symbol for polygon highlighting
-        this.symbols = {
-            polygon: {
-                type: "simple-fill",
-                color: [19, 253, 252, 0.2],
-                outline: {
-                    color: [19, 253, 252, 0.6],
-                    width: 2
+                if (!parishLayer) {
+                    console.log('Parish layer not found');
+                    return;
                 }
-            },
-            point: {
-                type: "simple-marker",
-                style: "circle",
-                color: [19, 253, 252, 0.6],
-                size: "12px",
-                outline: {
-                    color: [19, 253, 252, 1],
-                    width: 2
+
+                // Query the features at the clicked location
+                const query = parishLayer.createQuery();
+                query.geometry = event.mapPoint;
+                query.spatialRelationship = "intersects";
+                query.outFields = ["COUNTY", "MUNICIPALITY", "Par_NAME"];
+                query.returnGeometry = true;
+
+                const result = await parishLayer.queryFeatures(query);
+
+                if (result.features && result.features.length > 0) {
+                    const feature = result.features[0];
+                    const attributes = feature.attributes;
+
+                    // Create highlight graphic
+                    const symbol = this.getSymbolForGeometry(feature.geometry);
+                    const highlightGraphic = new Graphic({
+                        geometry: feature.geometry,
+                        symbol: symbol
+                    });
+
+                    // Clear previous highlights and add new one
+                    this.clearHighlight();
+                    this.highlightLayer.add(highlightGraphic);
+
+                    // Call the selection callback with the location details
+                    if (this.onLocationSelect) {
+                        this.onLocationSelect({
+                            county: attributes.COUNTY || '',
+                            municipality: attributes.MUNICIPALITY || '',
+                            parish: attributes.Par_NAME || ''
+                        });
+                    }
+                } else {
+                    // If clicked outside any feature, clear everything
+                    this.clearHighlight();
+                    if (this.onLocationSelect) {
+                        this.onLocationSelect({
+                            county: '',
+                            municipality: '',
+                            parish: ''
+                        });
+                    }
                 }
-            },
-            polyline: {
-                type: "simple-line",
-                color: [19, 253, 252, 0.6],
-                width: 4
+            } catch (error) {
+                console.log('Error handling map click:', error);
+                this.clearHighlight();
             }
-        };
+        });
     }
 
     getSymbolForGeometry(geometry) {
@@ -147,7 +209,7 @@ export class HighlightManager {
             return false;
         }
     }
-    
+
     clearHighlight() {
         if (this.highlightLayer) {
             this.highlightLayer.removeAll();

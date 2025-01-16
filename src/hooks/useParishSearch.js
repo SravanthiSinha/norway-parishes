@@ -18,19 +18,7 @@ export const useParishSearch = (mapElement) => {
 
     const highlightManagerRef = useRef(null);
 
-    // Initialize highlight manager when map is ready
-    useEffect(() => {
-        if (mapElement?.view && !highlightManagerRef.current) {
-            highlightManagerRef.current = new HighlightManager(mapElement.view);
-        }
 
-        return () => {
-            if (highlightManagerRef.current) {
-                highlightManagerRef.current.destroy();
-                highlightManagerRef.current = null;
-            }
-        };
-    }, [mapElement?.view]);
 
     const zoomToFeature = useCallback(async (whereClause) => {
         if (!mapElement?.map) return;
@@ -92,6 +80,25 @@ export const useParishSearch = (mapElement) => {
         }
     }, [zoomToFeature, shouldZoom]);
 
+
+    const handleLocationSelect = useCallback((location) => {
+        const { county, municipality, parish } = location;
+        handleComboBoxSelect(county, municipality, parish);
+    }, [handleComboBoxSelect]);
+
+    useEffect(() => {
+        if (mapElement?.view && !highlightManagerRef.current) {
+            highlightManagerRef.current = new HighlightManager(mapElement.view, handleLocationSelect);
+        }
+
+        return () => {
+            if (highlightManagerRef.current) {
+                highlightManagerRef.current.destroy();
+                highlightManagerRef.current = null;
+            }
+        };
+    }, [mapElement?.view, handleLocationSelect]);
+    
     const queryParishLayer = useCallback(async (geometry) => {
         if (!mapElement?.map) return null;
 
