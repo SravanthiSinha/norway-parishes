@@ -32,11 +32,11 @@ export const useParishSearch = (mapElement) => {
 
             const extentResult = await targetLayer.queryExtent({ where: whereClause });
             if (extentResult?.extent) {
-                await mapElement.view?.goTo(extentResult.extent);
                 // Highlight the feature
                 if (highlightManagerRef.current) {
                     await highlightManagerRef.current.highlightFeature(targetLayer, whereClause);
                 }
+                await mapElement.view?.goTo(extentResult.extent);
             }
         } catch (error) {
             console.error('Error zooming to feature:', error);
@@ -98,7 +98,7 @@ export const useParishSearch = (mapElement) => {
             }
         };
     }, [mapElement?.view, handleLocationSelect]);
-    
+
     const queryParishLayer = useCallback(async (geometry) => {
         if (!mapElement?.map) return null;
 
