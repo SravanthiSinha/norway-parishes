@@ -16,15 +16,15 @@ const Home = () => {
 
     return (
         <CalciteShell>
-            <ArcgisMap 
-                id={mapId} 
-                itemId="454a0303bffb487abf2d6c2c36ff4f0f" 
-                ref={mapRef} 
+            <ArcgisMap
+                id={mapId}
+                itemId="454a0303bffb487abf2d6c2c36ff4f0f"
+                ref={mapRef}
                 onArcgisViewReadyChange={(e) => setMap(e.target)}
             >
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <ArcgisZoom position="top-left" />
                     <ArcgisHome position="top-left" />
+                    <ArcgisZoom position="top-left" />
                 </div>
             </ArcgisMap>
             <SidePanel mapElement={map} referenceElement={`#${mapId}`} />

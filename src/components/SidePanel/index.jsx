@@ -6,7 +6,7 @@ import {
 } from "@esri/calcite-components-react";
 import { useMapData } from '../../hooks/useMapData';
 import { useParishSearch } from '../../hooks/useParishSearch';
-import ParishSearchPanel from './ParishSearchPanel';
+import ParishSearch from './ParishSearch';
 import Legend from './Legend';
 import BasemapGallery from './BasemapGallery';
 
@@ -35,7 +35,7 @@ const SidePanel = (props) => {
         switch (activePanel) {
             case 'parish-search':
                 return (
-                    <ParishSearchPanel
+                    <ParishSearch
                         counties={mapData.counties}
                         municipalities={mapData.municipalities}
                         parishes={mapData.parishes}
