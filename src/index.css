@@ -87,7 +87,7 @@ calcite-shell {
 
 calcite-shell-panel {
   --calcite-shell-panel-min-width: 200px;
-  --calcite-shell-panel-max-width: 25vw;
+  --calcite-shell-panel-max-width: 22vw;
 }
 
 .panel-content {
