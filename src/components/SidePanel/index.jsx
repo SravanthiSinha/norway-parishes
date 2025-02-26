@@ -62,7 +62,7 @@ const SidePanel = (props) => {
 
     return (
         <CalciteShellPanel slot="panel-end" position="end" widthScale="l" displayMode="dock" collapsed={isPanelCollapsed} >
-            <CalciteActionBar slot="action-bar">
+            <CalciteActionBar slot="action-bar" expanded="true">
                 <CalciteAction
                     data-action-id="parish-search"
                     text="Find a parish"
