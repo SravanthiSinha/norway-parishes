@@ -74,6 +74,7 @@ const ParishSearch = (props) => {
                                     onArcgisClear={onSearchClear}
                                     searchTerm={searchText}
                                     popupDisabled={true}
+                                    maxSuggestions={100}
                                 />
                             </CalciteLabel>
                         </div>
