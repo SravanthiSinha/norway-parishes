@@ -18,7 +18,7 @@ const Home = () => {
         <CalciteShell>
             <ArcgisMap
                 id={mapId}
-                itemId="454a0303bffb487abf2d6c2c36ff4f0f"
+                itemId="e52ddcfbc95847f780d299d452815502"
                 ref={mapRef}
                 onArcgisViewReadyChange={(e) => setMap(e.target)}
             >
