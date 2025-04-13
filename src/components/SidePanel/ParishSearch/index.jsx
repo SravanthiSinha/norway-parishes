@@ -35,6 +35,25 @@ const ParishSearch = (props) => {
         setLoading(false);
     }, [counties, parishes, municipalities]);
 
+    const onSuggestComplete = (event) => {
+
+        if (event.detail.results && event.detail.results.length > 0) {
+            // Get the first source's results
+            const sourceResults = event.detail.results[0];
+
+            if (sourceResults && sourceResults.results) {
+                // Filter to keep only suggestions whole last chars are 'NOR'
+                const filteredResults = sourceResults.results.filter(suggestion => {
+                    const text = (suggestion.text || "");
+                    return text.includes("NOR") && text.slice(-3) === "NOR";
+                });
+
+                // Replace the original results with filtered ones
+                sourceResults.results = filteredResults;
+            }
+        }
+    };
+    
     return (
         <CalcitePanel heading="Find a parish" id="parish-search" data-panel-id="parish-search" widthScale="l">
             <div className="panel-content">
@@ -75,6 +94,7 @@ const ParishSearch = (props) => {
                                     searchTerm={searchText}
                                     popupDisabled={true}
                                     maxSuggestions={100}
+                                    onArcgisSuggestComplete={onSuggestComplete}
                                 />
                             </CalciteLabel>
                         </div>
